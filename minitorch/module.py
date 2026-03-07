@@ -31,13 +31,32 @@ class Module:
 
     def train(self) -> None:
         """Set the mode of this module and all descendent modules to `train`."""
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        self.training = True
+        eval_list = []
+        if self.__dict__["_modules"]:
+            for k, v in self.__dict__["_modules"].items():
+                eval_list.append((k, v))
+            while(eval_list):
+                k, v = eval_list.pop()
+                v.training = True
+                if v.__dict__["_modules"]:
+                    for key, value in v.__dict__["_modules"].items():
+                        eval_list.append((key, value))
 
     def eval(self) -> None:
         """Set the mode of this module and all descendent modules to `eval`."""
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        self.training = False
+        eval_list = []
+        if self.__dict__["_modules"]:
+            for k, v in self.__dict__["_modules"].items():
+                eval_list.append((k, v))
+            while(eval_list):
+                k, v = eval_list.pop()
+                v.training = False
+                if v.__dict__["_modules"]:
+                    for key, value in v.__dict__["_modules"].items():
+                        eval_list.append((key, value))
+                
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -47,13 +66,26 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        parameters_list = []
+        for k, v in self.__dict__["_parameters"].items():
+            parameters_list.append((k, v))
+        name_list = []
+        if self.__dict__["_modules"]:
+            for k, v in self.__dict__["_modules"].items():
+                name_list.append((k, v))
+        while(name_list):
+            name, module = name_list.pop()
+            for k, v in module.__dict__["_parameters"].items():
+                parameters_list.append((name+"."+k, v))
+            if module.__dict__["_modules"]:
+                for key, value in module.__dict__["_modules"].items():
+                    name_list.append((name+"."+key, value))
+        return parameters_list
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        return list(dict(self.named_parameters()).values())
+
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
